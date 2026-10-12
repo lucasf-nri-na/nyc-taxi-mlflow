@@ -5,8 +5,10 @@ Databricks Declarative Automation Bundle generated with the official
 package are named `nyc_taxi_mlflow`.
 
 This is project scaffolding, not a completed MLflow training or serving system.
-It retains the sample notebook job, Python wheel task, and Lakeflow ETL pipeline
-that read `samples.nyctaxi.trips`. All sample triggers are **paused**, including in
+It loads raw taxi trip data (`yellow_tripdata_2026-01.parquet`) into a raw table (`raw_taxis`),
+downloading the parquet file only if the table does not exist or has zero records.
+The sample notebook job, Python wheel task, and Lakeflow ETL pipeline operate on
+this raw taxi table. All sample triggers are **paused**, including in
 production. Deploying creates/updates resources; it does not run them.
 
 ## Layout
@@ -204,8 +206,8 @@ Databricks privileges. An administrator must create
 `dbx_mlflow_dev.nyc_taxi_mlflow_dev`,
 `dbx_mlflow_dev.nyc_taxi_mlflow_prod`, and each developer's personal schema.
 Grant `USE CATALOG`, `USE SCHEMA`, and the table/materialized-view creation and
-management privileges required by the sample pipeline to the corresponding
-identity, plus read access to `samples.nyctaxi.trips`. Alternatively grant
+management privileges required by the sample pipeline and ingestion task to the
+corresponding identity. Alternatively grant
 appropriate schema-creation permissions when intentionally allowing resources
 to create schemas. Do not grant prod schema access to the dev principal.
 

@@ -23,12 +23,7 @@ resources:
           default: ${var.schema}
 
       tasks:
-        - task_key: notebook_task
-          notebook_task:
-            notebook_path: ../src/sample_notebook.ipynb
         - task_key: python_wheel_task
-          depends_on:
-            - task_key: notebook_task
           python_wheel_task:
             package_name: nyc_taxi_mlflow
             entry_point: main
@@ -38,9 +33,17 @@ resources:
               - "--schema"
               - "${var.schema}"
           environment_key: default
+        - task_key: notebook_task
+          depends_on:
+            - task_key: python_wheel_task
+          notebook_task:
+            notebook_path: ../src/sample_notebook.ipynb
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
         - task_key: refresh_pipeline
           depends_on:
-            - task_key: notebook_task
+            - task_key: python_wheel_task
           pipeline_task:
             pipeline_id: ${resources.pipelines.nyc_taxi_mlflow_etl.id}
 
