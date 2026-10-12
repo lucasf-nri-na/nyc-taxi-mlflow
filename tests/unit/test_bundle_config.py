@@ -34,10 +34,13 @@ def test_targets_are_isolated():
     assert targets["dev"]["default"] is True
     assert targets["dev"]["mode"] == "development"
     assert targets["dev"]["variables"]["schema"] == "${workspace.current_user.short_name}"
-    for target, schema in (("ci_dev", "nyc_taxi_mlflow_dev"), ("prod", "nyc_taxi_mlflow_prod")):
+    for target, schema, expected_root in (
+        ("ci_dev", "nyc_taxi_mlflow_dev", "~/.bundle/${bundle.name}/${bundle.target}"),
+        ("prod", "nyc_taxi_mlflow_prod", "/Workspace/Shared/.bundle/${bundle.name}/${bundle.target}"),
+    ):
         config = targets[target]
         assert config["variables"] == {"catalog": "dbx_mlflow_dev", "schema": schema}
-        assert config["workspace"]["root_path"] == "/Workspace/Shared/.bundle/${bundle.name}/${bundle.target}"
+        assert config["workspace"]["root_path"] == expected_root
         assert config["run_as"]["service_principal_name"] == "${var.service_principal_id}"
         assert config["permissions"] == [
             {"service_principal_name": "${var.service_principal_id}", "level": "CAN_MANAGE"}

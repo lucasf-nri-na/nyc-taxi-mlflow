@@ -68,7 +68,7 @@ All targets use workspace
 | Target | Mode | Schema | Deployment identity/location |
 | --- | --- | --- | --- |
 | `dev` (default) | development | Current user's short name | Personal authenticated identity and default user bundle path |
-| `ci_dev` | development | `nyc_taxi_mlflow_dev` | Dev service principal; `/Workspace/Shared/.bundle/nyc_taxi_mlflow/ci_dev` |
+| `ci_dev` | development | `nyc_taxi_mlflow_dev` | Dev service principal; `~/.bundle/nyc_taxi_mlflow/ci_dev` |
 | `prod` | production | `nyc_taxi_mlflow_prod` | Prod service principal; `/Workspace/Shared/.bundle/nyc_taxi_mlflow/prod` |
 
 Shared targets require `service_principal_id` (the application/client ID, not

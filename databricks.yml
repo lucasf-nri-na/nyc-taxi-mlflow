@@ -39,12 +39,12 @@ targets:
     mode: development
     workspace:
       host: https://adb-7405619604318859.19.azuredatabricks.net
-      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+      root_path: ~/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: dbx_mlflow_dev
       schema: nyc_taxi_mlflow_dev
     presets:
-      name_prefix: "[ci_dev] "
+      name_prefix: "[ci_dev ${workspace.current_user.short_name}] "
     run_as:
       service_principal_name: ${var.service_principal_id}
     permissions:
