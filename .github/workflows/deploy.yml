@@ -1,0 +1,48 @@
+name: Deploy bundle
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  main-only:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject non-main deployments
+        run: |
+          test "$GITHUB_REF" = "refs/heads/main" || {
+            echo "::error::Deployments must use main"
+            exit 1
+          }
+  checks:
+    needs: main-only
+    uses: ./.github/workflows/checks.yml
+  deploy:
+    needs: checks
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'prod' || 'dev' }}
+    concurrency:
+      group: bundle-${{ github.event_name == 'workflow_dispatch' && 'prod' || 'ci_dev' }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      BUNDLE_VAR_service_principal_id: ${{ vars.DATABRICKS_CLIENT_ID }}
+      BUNDLE_TARGET: ${{ github.event_name == 'workflow_dispatch' && 'prod' || 'ci_dev' }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          version: 0.11.1
+          python-version: "3.12"
+      - run: uv sync --frozen --only-group ci
+      - uses: ./.github/actions/databricks-auth
+      - run: databricks bundle validate --target "$BUNDLE_TARGET"
+      - run: databricks bundle deploy --target "$BUNDLE_TARGET"

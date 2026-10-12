@@ -1,0 +1,24 @@
+name: Authenticate to Databricks
+description: Check environment configuration and authenticate the intended service principal with OIDC
+runs:
+  using: composite
+  steps:
+    - uses: databricks/setup-cli@9b64c94a6d2b2e830592d80e9f14c26d32b42ad7
+      with:
+        version: 1.20.0
+    - name: Verify workspace and service principal
+      shell: bash
+      run: |
+        set -euo pipefail
+        : "${DATABRICKS_HOST:?Set the environment DATABRICKS_HOST variable}"
+        : "${DATABRICKS_CLIENT_ID:?Set the environment DATABRICKS_CLIENT_ID variable}"
+        : "${BUNDLE_VAR_service_principal_id:?Set the bundle run identity}"
+        test "${DATABRICKS_HOST%/}" = "https://adb-7405619604318859.19.azuredatabricks.net" || {
+          echo "::error::DATABRICKS_HOST must match the configured bundle workspace"
+          exit 1
+        }
+        test "$DATABRICKS_CLIENT_ID" = "$BUNDLE_VAR_service_principal_id" || {
+          echo "::error::The bundle run identity must match the deployment service principal"
+          exit 1
+        }
+        databricks current-user me --output json | python3 -c 'import json, os, sys; user = json.load(sys.stdin); assert user["userName"].lower() == os.environ["DATABRICKS_CLIENT_ID"].lower(), "Authenticated identity must be the configured service principal"'
