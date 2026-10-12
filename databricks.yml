@@ -1,0 +1,68 @@
+# This is a Declarative Automation Bundle definition for nyc_taxi_mlflow.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: nyc_taxi_mlflow
+  uuid: f88af435-2ac6-4a85-9af2-66567a008eaa
+
+include:
+  - resources/*.yml
+
+artifacts:
+  python_artifact:
+    type: whl
+    build: uv build --wheel
+
+# Shared deployments require the application ID of the authenticated service principal.
+variables:
+  catalog:
+    description: The catalog to use
+  schema:
+    description: The schema to use
+  service_principal_id:
+    description: Service principal application ID; required for ci_dev and prod
+
+targets:
+  dev:
+    # The default target uses 'mode: development' to create a development copy.
+    # - Deployed resources get prefixed with '[dev my_user_name]'
+    # - Any job schedules and triggers are paused by default.
+    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-7405619604318859.19.azuredatabricks.net
+    variables:
+      catalog: dbx_mlflow_dev
+      schema: ${workspace.current_user.short_name}
+      service_principal_id: ""
+  ci_dev:
+    mode: development
+    workspace:
+      host: https://adb-7405619604318859.19.azuredatabricks.net
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: dbx_mlflow_dev
+      schema: nyc_taxi_mlflow_dev
+    presets:
+      name_prefix: "[ci_dev] "
+    run_as:
+      service_principal_name: ${var.service_principal_id}
+    permissions:
+      - service_principal_name: ${var.service_principal_id}
+        level: CAN_MANAGE
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-7405619604318859.19.azuredatabricks.net
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: dbx_mlflow_dev
+      schema: nyc_taxi_mlflow_prod
+    presets:
+      name_prefix: "[prod] "
+      trigger_pause_status: PAUSED
+    run_as:
+      service_principal_name: ${var.service_principal_id}
+    permissions:
+      - service_principal_name: ${var.service_principal_id}
+        level: CAN_MANAGE
