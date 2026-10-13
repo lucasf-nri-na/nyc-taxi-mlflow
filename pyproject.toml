@@ -4,11 +4,14 @@ version = "0.0.1"
 authors = [{ name = "nyc-taxi-mlflow contributors" }]
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "mlflow>=3.17.1",
     # Any dependencies for jobs and pipelines in this project can be added here
     # See also https://docs.databricks.com/dev-tools/bundles/library-dependencies
     #
     # LIMITATION: for pipelines, dependencies are cached during development;
     # add dependencies to the 'environment' section of your pipeline.yml file instead
+    "scikit-learn>=1.9.1",
+    "xgboost>=3.4.1",
 ]
 
 [dependency-groups]
@@ -26,6 +29,7 @@ dev = [
 
 [project.scripts]
 main = "nyc_taxi_mlflow.main:main"
+train = "nyc_taxi_mlflow.train:main"
 
 [build-system]
 requires = ["hatchling==1.32.4"]

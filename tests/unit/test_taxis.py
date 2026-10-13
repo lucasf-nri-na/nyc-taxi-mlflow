@@ -119,3 +119,22 @@ def test_find_all_taxis_loads_if_unpopulated(mock_load):
         schema="test",
         table_name="raw_taxis",
     )
+
+
+def test_prep_raw_taxis_transformation_file_exists_and_defines_table():
+    import ast
+    from pathlib import Path
+
+    prep_file = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "nyc_taxi_mlflow_etl"
+        / "transformations"
+        / "prep_raw_taxis.py"
+    )
+    assert prep_file.is_file(), f"Expected transformation file at {prep_file}"
+    tree = ast.parse(prep_file.read_text(encoding="utf-8"))
+    function_names = [node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
+    assert "prep_raw_taxis" in function_names
+    assert "clean_and_prep_taxis" in function_names
+

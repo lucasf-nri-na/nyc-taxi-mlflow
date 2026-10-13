@@ -8,7 +8,9 @@ This is project scaffolding, not a completed MLflow training or serving system.
 It loads raw taxi trip data (`yellow_tripdata_2026-01.parquet`) into a raw table (`raw_taxis`),
 downloading the parquet file only if the table does not exist or has zero records.
 The sample notebook job, Python wheel task, and Lakeflow ETL pipeline operate on
-this raw taxi table. All sample triggers are **paused**, including in
+this raw taxi table, and a dedicated model training job trains and logs
+`RandomForestRegressor` and `XGBoostRegressor` models using MLflow.
+All sample triggers are **paused**, including in
 production. Deploying creates/updates resources; it does not run them.
 
 ## Layout
@@ -16,8 +18,8 @@ production. Deploying creates/updates resources; it does not run them.
 | Path | Purpose |
 | --- | --- |
 | `databricks.yml` | Bundle targets, artifact build, catalog/schema variables |
-| `resources/` | Sample job and serverless pipeline definitions |
-| `src/nyc_taxi_mlflow/` | Shared Python package and wheel entry point |
+| `resources/` | Sample job, model training job, and serverless pipeline definitions |
+| `src/nyc_taxi_mlflow/` | Shared Python package (taxis ingestion, training, and wheel entry points) |
 | `src/sample_notebook.ipynb` | Sample notebook task |
 | `src/nyc_taxi_mlflow_etl/` | Pipeline transformations |
 | `tests/unit/` | Credential-free configuration and workflow checks |
