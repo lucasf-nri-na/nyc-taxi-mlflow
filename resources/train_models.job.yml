@@ -1,0 +1,40 @@
+# Model training job for nyc_taxi_mlflow.
+# Trains RandomForestRegressor and XGBoostRegressor models with MLflow tracking.
+
+resources:
+  jobs:
+    train_models_job:
+      name: train_models_job
+
+      trigger:
+        pause_status: PAUSED
+        periodic:
+          interval: 1
+          unit: DAYS
+
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: schema
+          default: ${var.schema}
+
+      tasks:
+        - task_key: train_models_task
+          python_wheel_task:
+            package_name: nyc_taxi_mlflow
+            entry_point: train
+            parameters:
+              - "--catalog"
+              - "${var.catalog}"
+              - "--schema"
+              - "${var.schema}"
+              - "--table"
+              - "raw_taxis"
+          environment_key: default
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "5"
+            dependencies:
+              - ../dist/*.whl

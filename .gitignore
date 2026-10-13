@@ -6,6 +6,8 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
+mlruns/
+*.db
 scratch/**
 !scratch/README.md
 **/explorations/**

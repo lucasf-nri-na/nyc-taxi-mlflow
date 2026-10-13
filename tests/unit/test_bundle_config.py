@@ -66,6 +66,16 @@ def test_sample_workloads_are_paused_and_serverless():
     assert (ROOT / "resources" / pipeline["root_path"]).is_dir()
 
 
+def test_train_models_job_is_paused_and_serverless():
+    job = load_yaml("resources/train_models.job.yml")["resources"]["jobs"]["train_models_job"]
+    assert job["trigger"]["pause_status"] == "PAUSED"
+    assert all("job_cluster_key" not in task and "existing_cluster_id" not in task for task in job["tasks"])
+    assert job["environments"][0]["spec"]["dependencies"] == ["../dist/*.whl"]
+    task = job["tasks"][0]
+    assert task["python_wheel_task"]["package_name"] == "nyc_taxi_mlflow"
+    assert task["python_wheel_task"]["entry_point"] == "train"
+
+
 def test_offline_tests_do_not_initialize_databricks():
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert project["tool"]["pytest"]["ini_options"]["testpaths"] == ["tests/unit"]
